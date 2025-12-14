@@ -75,7 +75,17 @@ void _previewPhoto(int index) {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Cosplays')),
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+        title: const Text('Cosplays', style: TextStyle(fontSize: 24)),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(4),
+          child: Container(
+            height: 4,
+            color: Colors.amber,
+          ),
+        ),
+      ),
       body: _photos.isEmpty
           ? const Center(child: Text('No photos yet'))
           : GridView.count(

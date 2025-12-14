@@ -2,6 +2,7 @@ import 'package:final_project/pages/cosplans.dart';
 import 'package:final_project/pages/cosplays.dart';
 import 'package:final_project/pages/projects.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   runApp(const MyApp());
@@ -23,14 +24,24 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     final light = ThemeData(
       colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color.fromARGB(255, 254, 146, 4),
+        seedColor: const Color.fromARGB(255, 255, 189, 8),
         brightness: Brightness.light,
       ),
+      textTheme: GoogleFonts.robotoTextTheme(ThemeData.light().textTheme),
+      appBarTheme: AppBarTheme(
+        titleTextStyle: GoogleFonts.roboto(fontSize: 27, color: const Color.fromARGB(255, 0, 0, 0), fontWeight: FontWeight.w600),
+      ),
     );
+
     final dark = ThemeData(
       colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color.fromARGB(255, 254, 146, 4),
+        seedColor: const Color.fromARGB(255, 255, 189, 8),
         brightness: Brightness.dark,
+      ),
+      textTheme: GoogleFonts.aboretoTextTheme(ThemeData.dark().textTheme),
+      appBarTheme: AppBarTheme(
+        backgroundColor: const Color.fromARGB(255, 255, 189, 8),
+        titleTextStyle: GoogleFonts.aboreto(fontSize: 20, color: Colors.white, fontWeight: FontWeight.w600),
       ),
     );
 
@@ -75,9 +86,9 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: Colors.amber,
         centerTitle: true,
-        title: Text("Build-Book"),
+        title: Text("Build-Book", style: TextStyle(color: Colors.white)),
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.settings),
@@ -141,7 +152,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        backgroundColor: const Color.fromARGB(255, 227, 109, 36),
+        backgroundColor: Colors.amber[500],
         items: <BottomNavigationBarItem>[
           const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           const BottomNavigationBarItem(
@@ -159,7 +170,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: const Color.fromARGB(255, 255, 255, 255),
-        unselectedItemColor: const Color.fromARGB(255, 255, 175, 54),
+        unselectedItemColor: const Color.fromARGB(255, 202, 91, 1),
         onTap: (index) {
           setState(() {
             _selectedIndex = index;
