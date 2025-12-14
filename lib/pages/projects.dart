@@ -63,12 +63,31 @@ class _CurrentProjectState extends State<CurrentProject> {
                     child: const Icon(Icons.delete, color: Colors.white),
                   ),
                   direction: DismissDirection.endToStart,
+                  confirmDismiss: (direction) async {
+                    final shouldDelete = await showDialog<bool>(
+                      context: context,
+                      builder: (c) => AlertDialog(
+                        title: const Text('Are you sure you want to delete this project?'),
+                        content: const Text('This action cannot be undone.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(c).pop(false),
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.of(c).pop(true),
+                            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    return shouldDelete == true;
+                  },
                   onDismissed: (direction) => _deleteItem(index),
 
                   child: ListTile(
                     title: Text(item),
-
-                    // 👇 Tap to open ProjectPage
                     onTap: () {
                       Navigator.push(
                         context,

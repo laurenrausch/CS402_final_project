@@ -23,53 +23,75 @@ class _CosplaysState extends State<Cosplays> {
     }
   }
 
-  void _showAddPhotoDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Add A Photo"),
-        content: const Text("Take a new cosplay photo using your camera."),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context); // Close dialog
-              await _takePhoto(); // Launch camera
-            },
-            child: const Text("Open Camera"),
-          ),
-        ],
-      ),
-    );
+  void _removePhoto(int index) {
+    setState(() {
+      _photos.removeAt(index);
+    });
   }
+
+void _previewPhoto(int index) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      content: Image.file(File(_photos[index].path)),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text("Close"),
+        ),
+        TextButton(
+          onPressed: () async {
+            final confirmDelete = await showDialog<bool>(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text("Are you sure you want to delete this photo?"),
+                content: const Text("This action cannot be undone."),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: const Text("Cancel"),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: const Text("Delete",
+                        style: TextStyle(color: Colors.red)),
+                  ),
+                ],
+              ),
+            );
+
+            if (confirmDelete == true) {
+              Navigator.pop(context); // close the preview dialog
+              _removePhoto(index);    // delete the photo
+            }
+          },
+          child: const Text("Delete", style: TextStyle(color: Colors.red)),
+        ),
+      ],
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Cosplays')),
-
-      // Show grid if photos exist
       body: _photos.isEmpty
           ? const Center(child: Text('No photos yet'))
-          : GridView.builder(
+          : GridView.count(
+              crossAxisCount: 2,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
               padding: const EdgeInsets.all(10),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // two per row
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-              ),
-              itemCount: _photos.length,
-              itemBuilder: (context, index) {
-                return Image.file(File(_photos[index].path), fit: BoxFit.cover);
-              },
+              children: List.generate(_photos.length, (index) {
+                return GestureDetector(
+                  onTap: () => _previewPhoto(index),
+                  child: Image.file(File(_photos[index].path), fit: BoxFit.cover),
+                );
+              }),
             ),
-
       floatingActionButton: FloatingActionButton(
-        onPressed: _showAddPhotoDialog,
-        tooltip: 'Add New Photo',
+        onPressed: _takePhoto,
         child: const Icon(Icons.camera_alt_outlined),
       ),
     );
