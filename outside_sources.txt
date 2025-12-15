@@ -4,3 +4,6 @@ https://api.flutter.dev/flutter/material/BottomNavigationBar-class.html
 https://api.flutter.dev/flutter/material/CheckboxListTile-class.html
 https://api.flutter.dev/flutter/widgets/IndexedStack-class.html
 https://www.youtube.com/watch?v=tG6e-y4JJnI
+https://api.flutter.dev/flutter/material/Icons-class.html
+https://api.flutter.dev/flutter/widgets/GestureDetector-class.html
+https://api.flutter.dev/flutter/material/ElevatedButton-class.html

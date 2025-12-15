@@ -1,7 +1,11 @@
+import 'dart:io';
 import 'package:final_project/pages/cosplans.dart';
 import 'package:final_project/pages/cosplays.dart';
 import 'package:final_project/pages/projects.dart';
+import 'package:final_project/pages/settings.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
+import 'services/settings_notifier.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 void main() {
@@ -21,6 +25,23 @@ class _MyAppState extends State<MyApp> {
   void _setThemeMode(ThemeMode mode) => setState(() => _themeMode = mode);
 
   @override
+  void initState() {
+    super.initState();
+    _loadThemeFromPrefs();
+  }
+
+  Future<void> _loadThemeFromPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isDark = prefs.getBool('isDark');
+    setState(() {
+      if (isDark == null) {
+        _themeMode = ThemeMode.system;
+      } else {
+        _themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
+      }
+    });
+  }
+  @override
   Widget build(BuildContext context) {
     final light = ThemeData(
       colorScheme: ColorScheme.fromSeed(
@@ -38,15 +59,15 @@ class _MyAppState extends State<MyApp> {
         seedColor: const Color.fromARGB(255, 255, 189, 8),
         brightness: Brightness.dark,
       ),
-      textTheme: GoogleFonts.aboretoTextTheme(ThemeData.dark().textTheme),
+      textTheme: GoogleFonts.robotoTextTheme(ThemeData.dark().textTheme),
       appBarTheme: AppBarTheme(
-        backgroundColor: const Color.fromARGB(255, 255, 189, 8),
-        titleTextStyle: GoogleFonts.aboreto(fontSize: 20, color: Colors.white, fontWeight: FontWeight.w600),
+        backgroundColor: const Color.fromARGB(255, 0, 0, 0),
+        titleTextStyle: GoogleFonts.roboto(fontSize: 27, color: const Color.fromARGB(255, 255, 255, 255), fontWeight: FontWeight.w600),
       ),
     );
 
     return MaterialApp(
-      title: 'Flutter Final Project',
+      title: 'Flutter Final Project', 
       theme: light,
       darkTheme: dark,
       themeMode: _themeMode,
@@ -81,6 +102,27 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
+  String? _lastCosplayPath;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLastCosplay();
+    settingsVersion.addListener(_loadLastCosplay);
+  }
+
+  @override
+  void dispose() {
+    settingsVersion.removeListener(_loadLastCosplay);
+    super.dispose();
+  }
+
+  Future<void> _loadLastCosplay() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _lastCosplayPath = prefs.getString('last_cosplay_photo');
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,60 +133,87 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text("Build-Book", style: TextStyle(color: Colors.white)),
         actions: <Widget>[
           IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () => showDialog<void>(
-              context: context,
-              builder: (dialogContext) {
-                var selected = widget.themeMode;
-                return StatefulBuilder(
-                  builder: (c, setState) {
-                    return AlertDialog(
-                      title: const Text('Settings'),
-                      content: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          RadioListTile<ThemeMode>(
-                            title: const Text('Light'),
-                            value: ThemeMode.light,
-                            groupValue: selected,
-                            onChanged: (m) {
-                              setState(() {
-                                selected = m!;
-                              });
-                              widget.onThemeChanged(selected);
-                            },
-                          ),
-                          RadioListTile<ThemeMode>(
-                            title: const Text('Dark'),
-                            value: ThemeMode.dark,
-                            groupValue: selected,
-                            onChanged: (m) {
-                              setState(() {
-                                selected = m!;
-                              });
-                              widget.onThemeChanged(selected);
-                            },
-                          ),
-                        ],
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(dialogContext).pop(),
-                          child: const Text('Close'),
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
-            ),
+            icon: const Icon(Icons.settings, color: Colors.white),
+            onPressed: () async {
+              await Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsPage()));
+              // reload theme from prefs after returning from settings
+              final prefs = await SharedPreferences.getInstance();
+              final isDark = prefs.getBool('isDark');
+              setState(() {
+                if (isDark == null) {
+                  // leave as system
+                } else {
+                  widget.onThemeChanged(isDark ? ThemeMode.dark : ThemeMode.light);
+                }
+              });
+            },
           ),
         ],
       ),
       body: IndexedStack(
         index: _selectedIndex,
         children: [
-          Center(child: Text(widget.title)),
+          SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(widget.title, textAlign: TextAlign.center, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 6),
+                  const Text("Let's get started!", textAlign: TextAlign.center, style: TextStyle(fontSize: 18)),
+                  const SizedBox(height: 12),
+                  const Text('Let\'s get you started on your next project!', textAlign: TextAlign.center, style: TextStyle(fontSize: 16)),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 40,
+                    width: 300,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.amber),
+                      onPressed: () => setState(() => _selectedIndex = 3),
+                      child: const Text('Go to Projects', style: TextStyle(fontSize: 17, color: Colors.white, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(height: 4, width: double.infinity, color: Colors.amber),
+                  const SizedBox(height: 12),
+                  const Text('Last Cosplay', textAlign: TextAlign.center, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  _lastCosplayPath == null
+                      ? Container(
+                          height: 180,
+                          width: double.infinity,
+                          color: Colors.grey[200],
+                          child: const Center(child: Text('No cosplay photos yet')),
+                        )
+                      : SizedBox(
+                          width: 500,
+                          child: AspectRatio(
+                            aspectRatio: 1,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.file(File(_lastCosplayPath!), fit: BoxFit.cover),
+                            ),
+                          ),
+                        ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+                    child: const Text('Want to add another photo?', textAlign: TextAlign.center, style: TextStyle(fontSize: 16)),
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 40,
+                    width: 300,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.amber),
+                      onPressed: () => setState(() => _selectedIndex = 1),
+                      child: const Text('Go to Cosplays', style: TextStyle(fontSize: 17, color: Colors.white, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
           const Cosplays(),
           const CosPlans(),
           const CurrentProject(),
@@ -154,17 +223,17 @@ class _MyHomePageState extends State<MyHomePage> {
         type: BottomNavigationBarType.fixed,
         backgroundColor: Colors.amber[500],
         items: <BottomNavigationBarItem>[
-          const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home',),
           const BottomNavigationBarItem(
-            icon: Icon(Icons.person),
+            icon: Icon(Icons.collections_outlined),
             label: 'Cosplays',
           ),
           const BottomNavigationBarItem(
-            icon: Icon(Icons.list),
+            icon: Icon(Icons.face_retouching_natural),
             label: 'CosPlans',
           ),
           const BottomNavigationBarItem(
-            icon: Icon(Icons.build),
+            icon: Icon(Icons.content_cut_rounded),
             label: 'Projects',
           ),
         ],

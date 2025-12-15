@@ -34,7 +34,7 @@ class Project {
       description: description ?? this.description,
       todoItems: todoItems ?? List.from(this.todoItems),
       photoPaths: photoPaths ?? List.from(this.photoPaths),
-      createdAt: this.createdAt,
+      createdAt: createdAt,
       updatedAt: updatedAt ?? DateTime.now(),
     );
   }

@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../services/settings_notifier.dart';
 import 'package:image_picker/image_picker.dart';
 
 class Cosplays extends StatefulWidget {
@@ -12,6 +14,7 @@ class Cosplays extends StatefulWidget {
 class _CosplaysState extends State<Cosplays> {
   final List<XFile> _photos = [];
   final ImagePicker _picker = ImagePicker();
+  int _gridCount = 2;
 
   Future<void> _takePhoto() async {
     final XFile? image = await _picker.pickImage(source: ImageSource.camera);
@@ -20,12 +23,36 @@ class _CosplaysState extends State<Cosplays> {
       setState(() {
         _photos.add(image);
       });
+      // persist last cosplay photo path so home screen can show it
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('last_cosplay_photo', image.path);
+      settingsVersion.value++;
     }
   }
 
   void _removePhoto(int index) {
     setState(() {
       _photos.removeAt(index);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+    settingsVersion.addListener(_loadSettings);
+  }
+
+  @override
+  void dispose() {
+    settingsVersion.removeListener(_loadSettings);
+    super.dispose();
+  }
+
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _gridCount = prefs.getInt('cosplays_grid') ?? 2;
     });
   }
 
@@ -54,7 +81,7 @@ void _previewPhoto(int index) {
                   TextButton(
                     onPressed: () => Navigator.pop(context, true),
                     child: const Text("Delete",
-                        style: TextStyle(color: Colors.red)),
+                        style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),
@@ -76,7 +103,6 @@ void _previewPhoto(int index) {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
         title: const Text('Cosplays', style: TextStyle(fontSize: 24)),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(4),
@@ -89,7 +115,7 @@ void _previewPhoto(int index) {
       body: _photos.isEmpty
           ? const Center(child: Text('No photos yet'))
           : GridView.count(
-              crossAxisCount: 2,
+              crossAxisCount: _gridCount,
               crossAxisSpacing: 10,
               mainAxisSpacing: 10,
               padding: const EdgeInsets.all(10),
@@ -101,8 +127,9 @@ void _previewPhoto(int index) {
               }),
             ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.amber,
         onPressed: _takePhoto,
-        child: const Icon(Icons.camera_alt_outlined),
+        child: const Icon(Icons.add_a_photo_outlined, color: Colors.white),
       ),
     );
   }

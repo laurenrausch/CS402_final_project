@@ -59,8 +59,7 @@ class _CosPlansState extends State<CosPlans> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-        title: const Text('Your Cos-plans', style: TextStyle(fontSize: 24)),
+        title: const Text('Your Cos-Plans', style: TextStyle(fontSize: 24)),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(4),
           child: Container(
@@ -105,7 +104,7 @@ class _CosPlansState extends State<CosPlans> {
                       return await showDialog<bool>(
                         context: context,
                         builder: (c) => AlertDialog(
-                          title: const Text('Are you sure you want to delete this cosplan?'),
+                          title: const Text('Are you sure you want to delete this cos-plan?'),
                           content: const Text('This action cannot be undone.'),
                           actions: [
                             TextButton(onPressed: () => Navigator.of(c).pop(false), child: const Text('Cancel')),
@@ -131,7 +130,7 @@ class _CosPlansState extends State<CosPlans> {
             const Divider(),
             Padding(
               padding: const EdgeInsets.all(16),
-              child: const Text('Cosplays complete:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              child: const Text('Completed Cos-Plans:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             ),
             if (_completed.isEmpty)
               const Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Text('No completed items yet.', style: TextStyle(color: Colors.grey)))
@@ -210,7 +209,7 @@ class _CosPlansState extends State<CosPlans> {
           );
         },
         tooltip: 'Add New CosPlan',
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
